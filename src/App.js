@@ -42,12 +42,19 @@ class Game extends Component {
     super();
     this.state = {
     history: [{
-      squares: Array(9).fill(null)
+      squares: Array(9).fill(null),     
     }],
+    stepNumber: 0,
     xIsNext: true
     };
   }
-  handleClick(i) {    
+  jumpTo(step) {
+    this.setState({
+      stepNumber: step,
+      xIsNext: (step % 2) ? false: true,
+    });
+  }
+  handleClick(i, stepNumber) {    
   const history = this.state.history;
   const current = history[history.length - 1];
   const squares = current.squares.slice();
@@ -59,13 +66,22 @@ class Game extends Component {
     history: history.concat([{
       squares: squares
     }]),
+    stepNumber: history.length,
     xIsNext: !this.state.xIsNext,
   })
   }
   render() {
     const history = this.state.history;
-    const current = history[history.length - 1];
+    const current = history[this.state.stepNumber];
     const winner = calculateWinner(current.squares);
+    const moves = history.map((step, move) => {
+      const desc = move ? 'Move #'+move : 'Game start';
+      return (
+        <li key={move}>
+        <a href="#" onClick={() => this.jumpTo(move)}>{desc}</a>
+        </li>
+      );
+    })
     let status;
     if (winner) {
     status = 'Winner: ' + winner;
@@ -77,11 +93,11 @@ class Game extends Component {
         <div className="game-board">
                 <div className="status">{status}</div>
           <Board squares={current.squares}
-          onClick={(i)=>this.handleClick(i)}/>
+          onClick={(i, stepNumber)=>this.handleClick(i, stepNumber)}/>
         </div>
         <div className="game-info">
           <div>{/* status */}</div>
-          <ol>{/* TODO */}</ol>
+          <ol>{moves}</ol>
         </div>
       </div>
     );
